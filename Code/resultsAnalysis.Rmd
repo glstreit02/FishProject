@@ -1,0 +1,121 @@
+---
+title: "resultsAnalaysis"
+output: pdf_document
+date: "2024-11-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+
+results <- read.csv("/Users/garrett/Desktop/Strategy/2024/Q3/Academic_Plan/Fall_2024/EIND_468/Computational_Project/Code/Results.csv")
+
+results <- results[,-1]
+results[is.na(results)] <- 0
+
+mlpResults <- results[results$modType == "MLP",]
+kanResults <- results[results$modType == "KAN",]
+
+max_error_index <- which.max(kanResults$Error)
+kanResults <- kanResults[-max_error_index,]
+
+under1000_Params <- results[results$Params <= 1000,]
+
+print("MLP")
+summary(mlpResults)
+
+print("KAN")
+summary(kanResults)
+
+print("Under 1000 Params")
+summary(under1000_Params)
+
+```
+
+
+```{r}
+plot(kanResults$Params, kanResults$Error,
+     col = "blue", pch = 16, 
+     xlab = "Params", ylab = "Error", 
+     main = "Scatter Plot of Error vs Params (KAN)")
+```
+
+```{r}
+plot(mlpResults$Params, mlpResults$Error,
+     col = "red", pch = 16, 
+     xlab = "Params", ylab = "Error", 
+     main = "Scatter Plot of Error vs Params (MLP)")
+```
+
+```{r}
+plot(kanResults$GridSize, kanResults$Error,
+     col = "blue", pch = 16, 
+     xlab = "GridSize", ylab = "Error", 
+     main = "Scatter Plot of Error vs Grid Size (KAN)")
+```
+
+```{r}
+plot(kanResults$Hidden_Layers, kanResults$Error,
+     col = "blue", pch = 16, 
+     xlab = "Hidden Layers", ylab = "Error", 
+     main = "Scatter Plot of Error vs Hidden Layers (KAN)")
+```
+
+```{r}
+plot(mlpResults$Hidden_Layers, mlpResults$Error,
+     col = "red", pch = 16, 
+     xlab = " Hidden Layers", ylab = "Error", 
+     main = "Scatter Plot of Error vs Hidden Layers (MLP)")
+```
+
+```{r}
+#Basically there is no significant explanatory factor that reduces error.
+reg1 <- lm(Error ~ modType * Hidden_Layers * Params * GridSize, results)
+summary(reg1)
+```
+```{r}
+
+#Optimal solution
+min_error_index <- which.min(results$Error)
+print(results[min_error_index,])
+
+#Random seed of optimal solution
+sub <- results[1:min_error_index,]
+sum(sub$modType == "MLP")*2 +1
+```
+
+```{r}
+T_test1 <- t.test(kanResults$Error, mlpResults$Error)
+T_test1
+```
+
+
+```{r}
+boxplot(Error ~ modType, data = results,
+        main = "Box Plot of Errors by modType",
+        xlab = "Model Type",
+        ylab = "Error",
+        col = c("skyblue", "salmon"),
+        names = c("KAN", "MLP")
+       )
+```
+
+```{r}
+
+library(corrplot)
+
+inputData <- read.csv("/Users/garrett/Desktop/Strategy/2024/Q3/Academic_Plan/Fall_2024/EIND_468/Computational_Project/Code/mlpData.csv")
+
+inputData <- inputData[,-2]
+
+correlation_matrix <- cor(inputData)
+
+corrplot(correlation_matrix, method = "circle", type = "upper",
+         title = "Correlogram of Numerical Variables",
+         tl.col = "black", tl.cex = 0.8, addCoef.col = "black", 
+         number.cex = 0.7, mar = c(0, 0, 2, 0))
+```
+
