@@ -1,5 +1,5 @@
 <h1>Forecasting Sockeye Salmon runs with Kolmogorov Arnold Networks</h1>
-<a href  = "TODO"> Project White Paper</a>
+<a href  = "https://www.garrettstreit.com/white-paper"> Project White Paper</a>
 
 # Code
 
